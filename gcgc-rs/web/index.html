@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GCGC Log Analyzer</title>
+  <meta name="description" content="Analyze JVM garbage collection logs in the browser: pauses, heap, code cache and metaspace. Runs locally with WebAssembly.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b6fd8'/><path d='M7 22l5-7 5 4 8-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/plotly-cartesian.min.js" defer></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <h1>GCGC</h1>
+        <p class="tagline">Garbage Collection Graph Collector · runs entirely in your browser</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="examples" class="ghost" type="button">Load example logs</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar" aria-label="Inputs">
+      <section class="panel" id="runs-panel">
+        <h2>Runs</h2>
+        <p class="hint">One run = one JVM execution. Rotated files (<code>gc.log.0</code>, <code>gc.log.1</code>) are merged into one run.</p>
+        <label id="dropzone" class="dropzone" tabindex="0">
+          <input id="file-input" type="file" multiple hidden>
+          <span class="dz-title">Drop GC logs here</span>
+          <span class="dz-sub">or click to choose files · <code>-Xlog:gc*:file=gc.log</code></span>
+        </label>
+        <ol id="run-list" class="run-list"></ol>
+        <div id="run-status" class="status" role="status" aria-live="polite"></div>
+        <details class="options">
+          <summary>Parsing options</summary>
+          <label class="check"><input type="checkbox" id="opt-zero" checked> Start every run at t = 0</label>
+          <label class="check"><input type="checkbox" id="opt-crash"> Treat JVM restarts as continuous time</label>
+        </details>
+      </section>
+
+      <section class="panel" id="external-panel">
+        <h2>External data <span class="badge">optional</span></h2>
+        <p class="hint">Overlay a CSV series (e.g. application throughput) on the pause chart in #21.</p>
+        <input id="csv-input" type="file" accept=".csv,text/csv">
+        <div id="csv-fields" class="csv-fields" hidden>
+          <label>Label <input id="csv-label" type="text" value="External data"></label>
+          <label>Time column (s) <select id="csv-x"></select></label>
+          <label>Value column <select id="csv-y"></select></label>
+          <button id="csv-clear" class="ghost small" type="button">Remove</button>
+        </div>
+      </section>
+
+      <nav class="panel toc" aria-label="Analyses">
+        <h2>Analyses</h2>
+        <ol id="toc"></ol>
+      </nav>
+    </aside>
+
+    <section class="content" aria-live="polite">
+      <div id="empty" class="empty">
+        <h2>Add GC logs to begin</h2>
+        <p>Drop one or more unified JVM GC logs (JDK 9+, <code>-Xlog:gc*</code>) on the left, or load the bundled examples
+          (Serial, Parallel, G1, Shenandoah, ZGC, generational ZGC and GraalVM).</p>
+        <p class="hint">Nothing is uploaded: logs are parsed locally by a WebAssembly build of the GCGC engine.</p>
+      </div>
+      <div id="analyses"></div>
+    </section>
+  </main>
+
+  <template id="card-template">
+    <article class="card">
+      <header class="card-head">
+        <span class="num"></span>
+        <div class="card-titles">
+          <h3></h3>
+          <p class="desc"></p>
+        </div>
+        <button class="ghost small settings-toggle" type="button" aria-expanded="false">Settings</button>
+      </header>
+      <form class="settings" hidden></form>
+      <div class="figures"></div>
+      <pre class="stdout" hidden></pre>
+      <ul class="diagnostics" hidden></ul>
+      <p class="error" hidden></p>
+    </article>
+  </template>
+</body>
+</html>
