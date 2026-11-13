@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GCGC Python vs Rust</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .cmp-wrap { max-width: 1700px; margin: 0 auto; padding: 20px 24px 48px; }
+    .cmp-intro { max-width: 900px; }
+    .cmp-controls { display: flex; gap: 12px; align-items: center; margin: 12px 0 20px; flex-wrap: wrap; }
+    .row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; }
+    .row h3 { font-size: 15px; margin-bottom: 8px; }
+    .row h3 small { color: var(--muted); font-weight: 400; margin-left: 8px; }
+    .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .side h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 6px; }
+    .side img { max-width: 100%; background: #fff; border-radius: 6px; display: block; margin-bottom: 8px; }
+    .side pre { font: 11px/1.4 var(--mono); background: var(--code-bg); padding: 8px; border-radius: 6px; overflow-x: auto; white-space: pre; margin: 0 0 8px; }
+    .same { color: #2e7d32; font-weight: 600; }
+    .diff { color: var(--danger); font-weight: 600; }
+    @media (max-width: 900px) { .pair { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+  <script src="vendor/plotly-cartesian.min.js" defer></script>
+  <script type="module" src="compare.js"></script>
+</head>
+<body>
+  <div class="cmp-wrap">
+    <h1>Python notebook vs Rust/WebAssembly port</h1>
+    <p class="cmp-intro">Left: the figures and printed output from running the <b>original Python notebook</b> (matplotlib,
+      Python 3.9, pandas 1.5.3) on the example logs, recorded by <code>port-notes/tools/make_golden.sh</code>.
+      Right: the <b>same cell computed by the WebAssembly engine</b> in this browser from the same logs, drawn with Plotly.
+      Styling differs (matplotlib vs Plotly); the plotted data is what the automated tests compare exactly.</p>
+    <div class="cmp-controls">
+      <label>Notebook
+        <select id="nb">
+          <option value="GCGC">GCGC.ipynb (Serial, Parallel, G1, Shenandoah, ZGC, GenZGC, GraalVM)</option>
+          <option value="FeatureExamples">FeatureExamples.ipynb (metaspace + code cache logs)</option>
+        </select>
+      </label>
+      <span id="status" class="status"></span>
+    </div>
+    <div id="rows"></div>
+  </div>
+</body>
+</html>
